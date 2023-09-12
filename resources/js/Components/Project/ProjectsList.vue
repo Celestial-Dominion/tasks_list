@@ -1,9 +1,9 @@
 <script setup>
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
 import { router } from '@inertiajs/vue3'
 import { onMounted } from 'vue';
 
-const props = defineProps({ project: Object })
+const props = defineProps({ project: Object, currentUser: Object })
 
 const form = reactive({
   body: ''
@@ -34,13 +34,28 @@ function reloadCurrentPage() {
 }
 
 onMounted(() => {
-  // window.Echo.channel('tasks.' + props.project.id ).listen('TaskCreated', e => {
-  //   reloadCurrentPage();
-  // });
   window.Echo.private('tasks.' + props.project.id).listen('TaskCreated', e => {
     reloadCurrentPage();
+  }).listenForWhisper('typing', e => {
+    activePeer.name = e.name;
+
+    if (typingTimer.value) clearTimeout(typingTimer.value)
+
+    typingTimer.value = setTimeout(() => {
+      activePeer.name = '';
+    }, 3000)
   });
 })
+
+let activePeer = reactive({ name: '' });
+let typingTimer = ref(false);
+
+function tapParticipants() {
+  window.Echo.private('tasks.' + props.project.id)
+    .whisper('typing', {
+      name: props.currentUser.name
+    });
+}
 
 </script>
 
@@ -52,6 +67,7 @@ onMounted(() => {
     </ul>
 
     <label for="task_name">Task name</label>
-    <input id="task_name" type="text" v-model="form.body" @blur="submit">
+    <input id="task_name" type="text" v-model="form.body" @blur="submit" @keydown="tapParticipants">
+    <span v-if="activePeer.name && activePeer.name.length > 0" v-text="activePeer.name + ' is typing...'"></span>
   </div>
 </template>

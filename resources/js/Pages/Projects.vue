@@ -2,7 +2,7 @@
 import AppLayout from '@/Layouts/AppLayout.vue';
 import ProjectsList from '@/Components/Project/ProjectsList.vue';
 
-defineProps({ project: Object })
+defineProps({ project: Object, currentUser: Object })
 </script>
 
 <template>
@@ -16,7 +16,7 @@ defineProps({ project: Object })
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
-                  <ProjectsList :project="project"></ProjectsList>
+                  <ProjectsList :project="project" :current-user="currentUser"></ProjectsList>
                 </div>
             </div>
         </div>

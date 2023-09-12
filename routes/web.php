@@ -40,9 +40,11 @@ Route::middleware([
     Route::middleware(['check.project.participant'])->group(function () {
         Route::get('/project/{project}', function (Project $project) {
             $project->load(('tasks'));
+            $currentUser = auth()->user();
 
             return Inertia::render('Projects', [
-                'project' => $project
+                'project' => $project,
+                'currentUser' => $currentUser
             ]);
         });
 
