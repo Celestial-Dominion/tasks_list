@@ -1,6 +1,9 @@
 <?php
 
+use App\Events\TaskCreated;
+use App\Models\Task;
 use Illuminate\Foundation\Application;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -32,4 +35,18 @@ Route::middleware([
     Route::get('/dashboard', function () {
         return Inertia::render('Dashboard');
     })->name('dashboard');
+
+    Route::get('/tasks', function () {
+        $tasks = Task::latest()->pluck('body');
+        return Inertia::render('Tasks', [
+            'tasks' => $tasks
+        ]);
+    });
+
+
+    Route::post('/tasks', function (Request $request) {
+        $task = Task::forceCreate(['body' => $request['body']]);
+
+        event(new TaskCreated($task));
+    });
 });
