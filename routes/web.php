@@ -36,25 +36,25 @@ Route::middleware([
     Route::get('/dashboard', function () {
         return Inertia::render('Dashboard');
     })->name('dashboard');
+    
+    Route::middleware(['check.project.participant'])->group(function () {
+        Route::get('/project/{project}', function (Project $project) {
+            $project->load(('tasks'));
 
-    Route::get('/project/{project}', function (Project $project) {
-        $project->load(('tasks'));
-       
-        return Inertia::render('Projects', [
-            'project' => $project
-        ]);
-    });
+            return Inertia::render('Projects', [
+                'project' => $project
+            ]);
+        });
 
-    Route::get('api/projects/{project}', function (Project $project) {
-        return $project->tasks->pluck('body');
-    });
+        Route::get('api/projects/{project}', function (Project $project) {
+            return $project->tasks->pluck('body');
+        });
 
-    Route::post('api/projects/{project}/tasks', function (Project $project, Request $request) {
-        $task = $project->tasks()->create(['body' => $request['body']]);
+        Route::post('api/projects/{project}/tasks', function (Project $project, Request $request) {
+            $task = $project->tasks()->create(['body' => $request['body']]);
 
-        event(new TaskCreated($task));
-
-        // return $task;
+            event(new TaskCreated($task));
+        });
     });
 
     // Route::get('/tasks', function () {

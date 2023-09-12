@@ -10,6 +10,12 @@ const form = reactive({
 })
 
 function submit() {
+  if (form.body === '') {
+    alert('Value must be filled.');
+
+    return;
+  }
+
   router.post(`/api/projects/${props.project.id}/tasks`, form);
 
   form.body = '';
@@ -28,7 +34,10 @@ function reloadCurrentPage() {
 }
 
 onMounted(() => {
-  window.Echo.channel('tasks.' + props.project.id ).listen('TaskCreated', e => {
+  // window.Echo.channel('tasks.' + props.project.id ).listen('TaskCreated', e => {
+  //   reloadCurrentPage();
+  // });
+  window.Echo.private('tasks.' + props.project.id).listen('TaskCreated', e => {
     reloadCurrentPage();
   });
 })
@@ -42,6 +51,7 @@ onMounted(() => {
       <li v-for="task in project['tasks']" v-text="task['body']"></li>
     </ul>
 
-    <input type="text" v-model="form.body" @blur="submit">
+    <label for="task_name">Task name</label>
+    <input id="task_name" type="text" v-model="form.body" @blur="submit">
   </div>
 </template>
