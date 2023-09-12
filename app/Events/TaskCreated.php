@@ -36,7 +36,8 @@ class TaskCreated implements ShouldBroadcast
     {
         return [
             // new Channel('tasks.' . $this->task->project_id)
-            new PrivateChannel('tasks.' . $this->task->project_id)
+            // new PrivateChannel('tasks.' . $this->task->project_id)
+            new PresenceChannel('tasks.' . $this->task->project_id)
         ];
     }
 }

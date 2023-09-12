@@ -34,17 +34,28 @@ function reloadCurrentPage() {
 }
 
 onMounted(() => {
-  window.Echo.private('tasks.' + props.project.id).listen('TaskCreated', e => {
-    reloadCurrentPage();
-  }).listenForWhisper('typing', e => {
-    activePeer.name = e.name;
+  window.Echo.join('tasks.' + props.project.id)
+    .here(users => {
+      participants.items = [...users]
+    })
+    .joining(user => {
+      participants.items.push(user)
+    })
+    .leaving(user => {
+      participants.items.splice(participants.items.indexOf(user), 1);
+    })
+    .listen('TaskCreated', e => {
+      reloadCurrentPage();
+    })
+    .listenForWhisper('typing', e => {
+      activePeer.name = e.name;
 
-    if (typingTimer.value) clearTimeout(typingTimer.value)
+      if (typingTimer.value) clearTimeout(typingTimer.value)
 
-    typingTimer.value = setTimeout(() => {
-      activePeer.name = '';
-    }, 3000)
-  });
+      typingTimer.value = setTimeout(() => {
+        activePeer.name = '';
+      }, 3000)
+    });
 })
 
 let activePeer = reactive({ name: '' });
@@ -56,6 +67,10 @@ function tapParticipants() {
       name: props.currentUser.name
     });
 }
+
+let participants = reactive({
+  items: []
+});
 
 </script>
 
@@ -119,15 +134,11 @@ function tapParticipants() {
 
       <!-- Online Users List -->
       <div class="w-1/4 h-48 bg-white shadow-md rounded-lg p-5 overflow-y-auto">
-        <h3 class="text-xl font-bold mb-4">Online Users</h3>
+        <h3 class="text-xl font-bold mb-4">Active Participants</h3>
         <ul class="space-y-2">
-          <li class="flex items-center space-x-2">
+          <li class="flex items-center space-x-2" v-for="(participant, index) in participants.items" :key="index">
             <span class="w-3 h-3 bg-green-500 rounded-full"></span>
-            <span>User 1</span>
-          </li>
-          <li class="flex items-center space-x-2">
-            <span class="w-3 h-3 bg-green-500 rounded-full"></span>
-            <span>User 2</span>
+            <span>{{ participant.name }}</span>
           </li>
           <!-- Add more users as needed -->
         </ul>
