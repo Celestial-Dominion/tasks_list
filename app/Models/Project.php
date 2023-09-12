@@ -5,16 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Task extends Model
+class Project extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'body'
+        'name'
     ];
 
-    public function project()
+    public function tasks()
     {
-        return $this->belongsTo(Project::class);
+        return $this->hasMany(Task::class);
     }
 }

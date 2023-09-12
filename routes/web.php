@@ -1,6 +1,7 @@
 <?php
 
 use App\Events\TaskCreated;
+use App\Models\Project;
 use App\Models\Task;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
@@ -36,17 +37,37 @@ Route::middleware([
         return Inertia::render('Dashboard');
     })->name('dashboard');
 
-    Route::get('/tasks', function () {
-        $tasks = Task::latest()->pluck('body');
-        return Inertia::render('Tasks', [
-            'tasks' => $tasks
+    Route::get('/project/{project}', function (Project $project) {
+        $project->load(('tasks'));
+       
+        return Inertia::render('Projects', [
+            'project' => $project
         ]);
     });
 
+    Route::get('api/projects/{project}', function (Project $project) {
+        return $project->tasks->pluck('body');
+    });
 
-    Route::post('/tasks', function (Request $request) {
-        $task = Task::forceCreate(['body' => $request['body']]);
+    Route::post('api/projects/{project}/tasks', function (Project $project, Request $request) {
+        $task = $project->tasks()->create(['body' => $request['body']]);
 
         event(new TaskCreated($task));
+
+        // return $task;
     });
+
+    // Route::get('/tasks', function () {
+    //     $tasks = Task::latest()->pluck('body');
+    //     return Inertia::render('Tasks', [
+    //         'tasks' => $tasks
+    //     ]);
+    // });
+
+
+    // Route::post('/tasks', function (Request $request) {
+    //     $task = Task::forceCreate(['body' => $request['body']]);
+
+    //     event(new TaskCreated($task));
+    // });
 });
